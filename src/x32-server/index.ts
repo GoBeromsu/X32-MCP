@@ -1,9 +1,15 @@
 #!/usr/bin/env node
-import { z } from 'zod';
 import { McpServer } from '../server/mcp.js';
 import { StdioServerTransport } from '../server/stdio.js';
 import { X32Connection } from './x32-connection.js';
-import { CallToolResult } from '../types.js';
+import {
+    registerConnectTool,
+    registerInfoTool,
+    registerStatusTool,
+    registerGetParameterTool,
+    registerSetParameterTool,
+    registerChannelTool
+} from './tools/index.js';
 
 /**
  * X32 MCP Server
@@ -26,139 +32,13 @@ async function main() {
         }
     );
 
-    // Register x32_connect tool
-    server.tool(
-        'x32_connect',
-        'Connect to X32/M32 mixer via OSC protocol',
-        {
-            host: z.string().describe('X32/M32 mixer IP address'),
-            port: z.number().default(10023).describe('X32/M32 mixer OSC port (default: 10023)')
-        },
-        async ({ host, port }): Promise<CallToolResult> => {
-            if (connection.connected) {
-                return {
-                    content: [
-                        {
-                            type: 'text',
-                            text: 'Already connected to X32/M32 mixer'
-                        }
-                    ]
-                };
-            }
-
-            try {
-                await connection.connect({ host, port });
-                return {
-                    content: [
-                        {
-                            type: 'text',
-                            text: `Successfully connected to X32/M32 at ${host}:${port}`
-                        }
-                    ]
-                };
-            } catch (error) {
-                return {
-                    content: [
-                        {
-                            type: 'text',
-                            text: `Failed to connect: ${error instanceof Error ? error.message : String(error)}`
-                        }
-                    ],
-                    isError: true
-                };
-            }
-        }
-    );
-
-    // Register x32_get_info tool
-    server.tool('x32_get_info', 'Get X32/M32 mixer console information (model, version, etc.)', {}, async (): Promise<CallToolResult> => {
-        if (!connection.connected) {
-            return {
-                content: [
-                    {
-                        type: 'text',
-                        text: 'Not connected to X32/M32 mixer. Use x32_connect first.'
-                    }
-                ],
-                isError: true
-            };
-        }
-
-        try {
-            const info = await connection.getInfo();
-            const output = [
-                `Console Model: ${info.consoleModel}`,
-                `Console Version: ${info.consoleVersion}`,
-                `Server Name: ${info.serverName}`,
-                `Server Version: ${info.serverVersion}`
-            ].join('\n');
-
-            return {
-                content: [
-                    {
-                        type: 'text',
-                        text: output
-                    }
-                ]
-            };
-        } catch (error) {
-            return {
-                content: [
-                    {
-                        type: 'text',
-                        text: `Failed to get info: ${error instanceof Error ? error.message : String(error)}`
-                    }
-                ],
-                isError: true
-            };
-        }
-    });
-
-    // Register x32_get_status tool
-    server.tool(
-        'x32_get_status',
-        'Get X32/M32 mixer current status (state, IP address, server name)',
-        {},
-        async (): Promise<CallToolResult> => {
-            if (!connection.connected) {
-                return {
-                    content: [
-                        {
-                            type: 'text',
-                            text: 'Not connected to X32/M32 mixer. Use x32_connect first.'
-                        }
-                    ],
-                    isError: true
-                };
-            }
-
-            try {
-                const status = await connection.getStatus();
-                const output = [`State: ${status.state}`, `IP Address: ${status.ipAddress}`, `Server Name: ${status.serverName}`].join(
-                    '\n'
-                );
-
-                return {
-                    content: [
-                        {
-                            type: 'text',
-                            text: output
-                        }
-                    ]
-                };
-            } catch (error) {
-                return {
-                    content: [
-                        {
-                            type: 'text',
-                            text: `Failed to get status: ${error instanceof Error ? error.message : String(error)}`
-                        }
-                    ],
-                    isError: true
-                };
-            }
-        }
-    );
+    // Register all tools
+    registerConnectTool(server, connection);
+    registerInfoTool(server, connection);
+    registerStatusTool(server, connection);
+    registerGetParameterTool(server, connection);
+    registerSetParameterTool(server, connection);
+    registerChannelTool(server, connection);
 
     // Setup connection event handlers
     connection.on('connected', () => {
@@ -184,6 +64,9 @@ async function main() {
     console.error('  - x32_connect: Connect to X32/M32 mixer');
     console.error('  - x32_get_info: Get console information');
     console.error('  - x32_get_status: Get current status');
+    console.error('  - x32_get_parameter: Get parameter by OSC address');
+    console.error('  - x32_set_parameter: Set parameter by OSC address');
+    console.error('  - x32_channel: Get/set channel parameters');
 
     // Handle graceful shutdown
     process.on('SIGINT', async () => {

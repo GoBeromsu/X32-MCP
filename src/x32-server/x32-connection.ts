@@ -1,3 +1,4 @@
+// @ts-ignore - osc package has no type definitions
 import osc from 'osc';
 import { EventEmitter } from 'events';
 import { X32ConnectionConfig, X32InfoResponse, X32StatusResponse, OscMessage } from './types.js';
@@ -199,6 +200,84 @@ export class X32Connection extends EventEmitter {
      */
     getConfig(): X32ConnectionConfig | null {
         return this.config;
+    }
+
+    /**
+     * Get parameter value from X32/M32
+     * @param address OSC address pattern (e.g., '/ch/01/mix/fader')
+     * @returns Parameter value
+     */
+    async getParameter<T = any>(address: string): Promise<T> {
+        const response = await this.sendMessage(address);
+        if (!response || !response.args || response.args.length === 0) {
+            throw new Error(`No value returned from ${address}`);
+        }
+        return response.args[0].value as T;
+    }
+
+    /**
+     * Set parameter value on X32/M32
+     * @param address OSC address pattern
+     * @param value Value to set (string, number, or buffer)
+     */
+    async setParameter(address: string, value: any): Promise<void> {
+        await this.sendMessage(address, [value], false);
+    }
+
+    /**
+     * Get channel parameter
+     * @param channel Channel number (1-32)
+     * @param param Parameter path (e.g., 'config/name', 'mix/fader')
+     * @returns Parameter value
+     */
+    async getChannelParameter<T = any>(channel: number, param: string): Promise<T> {
+        if (channel < 1 || channel > 32) {
+            throw new Error('Channel must be between 1 and 32');
+        }
+        const ch = channel.toString().padStart(2, '0');
+        return this.getParameter<T>(`/ch/${ch}/${param}`);
+    }
+
+    /**
+     * Set channel parameter
+     * @param channel Channel number (1-32)
+     * @param param Parameter path (e.g., 'config/name', 'mix/fader')
+     * @param value Value to set
+     */
+    async setChannelParameter(channel: number, param: string, value: any): Promise<void> {
+        if (channel < 1 || channel > 32) {
+            throw new Error('Channel must be between 1 and 32');
+        }
+        const ch = channel.toString().padStart(2, '0');
+        await this.setParameter(`/ch/${ch}/${param}`, value);
+    }
+
+    /**
+     * Get bus parameter
+     * @param bus Bus number (1-16)
+     * @param param Parameter path (e.g., 'mix/fader', 'mix/on')
+     * @returns Parameter value
+     */
+    async getBusParameter<T = any>(bus: number, param: string): Promise<T> {
+        if (bus < 1 || bus > 16) {
+            throw new Error('Bus must be between 1 and 16');
+        }
+        const busNum = bus.toString().padStart(2, '0');
+        return this.getParameter<T>(`/bus/${busNum}/${param}`);
+    }
+
+    /**
+     * Set bus parameter
+     * @param bus Bus number (1-16)
+     * @param param Parameter path (e.g., 'mix/fader', 'mix/on')
+     * @param value Value to set
+     */
+    async setBusParameter(bus: number, param: string, value: any): Promise<void> {
+        if (bus < 1 || bus > 16) {
+            throw new Error('Bus must be between 1 and 16');
+        }
+        const busNum = bus.toString().padStart(2, '0');
+        await this.setParameter(`/bus/${busNum}/${param}`, value);
     }
 
     /**
