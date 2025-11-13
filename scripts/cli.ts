@@ -8,9 +8,9 @@ import { Client } from '../src/client/index.js';
 import { SSEClientTransport } from '../src/client/sse.js';
 import { StdioClientTransport } from '../src/client/stdio.js';
 import { WebSocketClientTransport } from '../src/client/websocket.js';
-import { Server } from '../src/server/index.js';
-import { SSEServerTransport } from '../src/server/sse.js';
-import { StdioServerTransport } from '../src/server/stdio.js';
+import { Server } from '../src/mcp/index.js';
+// SSE transport not available in simplified X32 server
+import { StdioServerTransport } from '../src/mcp/stdio.js';
 import { ListResourcesResultSchema } from '../src/types.js';
 
 async function runClient(url_or_command: string, args: string[]) {
@@ -63,6 +63,8 @@ async function runServer(port: number | null) {
 
         let servers: Server[] = [];
 
+        // SSE endpoint commented out - SSEServerTransport not available in simplified X32 server
+        /*
         app.get('/sse', async (req, res) => {
             console.log('Got new SSE connection');
 
@@ -86,7 +88,10 @@ async function runServer(port: number | null) {
 
             await server.connect(transport);
         });
+        */
 
+        // Message endpoint commented out - requires SSEServerTransport
+        /*
         app.post('/message', async (req, res) => {
             console.log('Received message');
 
@@ -99,6 +104,7 @@ async function runServer(port: number | null) {
 
             await transport.handlePostMessage(req, res);
         });
+        */
 
         app.listen(port, error => {
             if (error) {

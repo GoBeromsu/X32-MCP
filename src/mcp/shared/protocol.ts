@@ -26,7 +26,8 @@ import {
     RequestInfo
 } from '../../types.js';
 import { Transport, TransportSendOptions } from './transport.js';
-import { AuthInfo } from '../server/auth/types.js';
+// AuthInfo type for authentication - simplified for X32 server
+type AuthInfo = any;
 
 /**
  * Callback for progress notifications.
