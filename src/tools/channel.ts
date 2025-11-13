@@ -3,6 +3,7 @@ import { McpServer } from '../mcp/mcp.js';
 import { CallToolResult } from '../types/index.js';
 import { X32Connection } from '../services/x32-connection.js';
 import { dbToFader, faderToDb, formatDb } from '../utils/db-converter.js';
+import { getColorValue, getColorName, getAvailableColors } from '../utils/color-converter.js';
 
 /**
  * Channel domain tools
@@ -318,18 +319,21 @@ function registerChannelGetStateTool(server: McpServer, connection: X32Connectio
             }
 
             try {
-                const [fader, on, solo, gain, name] = await Promise.all([
+                const [fader, on, solo, gain, name, color] = await Promise.all([
                     connection.getChannelParameter(channel, 'mix/fader'),
                     connection.getChannelParameter(channel, 'mix/on'),
                     connection.getChannelParameter(channel, 'solo'),
                     connection.getChannelParameter(channel, 'head/gain'),
-                    connection.getChannelParameter(channel, 'config/name')
+                    connection.getChannelParameter(channel, 'config/name'),
+                    connection.getChannelParameter(channel, 'config/color')
                 ]);
 
                 const faderDb = faderToDb(Number(fader));
+                const colorName = getColorName(Number(color)) || `color ${color}`;
                 const output = [
                     `Channel ${channel} State:`,
                     `  Name: ${name || '(unnamed)'}`,
+                    `  Color: ${colorName}`,
                     `  Fader: ${formatDb(faderDb)} (linear: ${Number(fader).toFixed(3)})`,
                     `  Muted: ${Number(on) === 0 ? 'Yes' : 'No'}`,
                     `  Solo: ${Number(solo) === 1 ? 'Yes' : 'No'}`,
@@ -414,6 +418,143 @@ function registerChannelSetEqBandTool(server: McpServer, connection: X32Connecti
                         {
                             type: 'text',
                             text: `Failed to set EQ band: ${error instanceof Error ? error.message : String(error)}`
+                        }
+                    ],
+                    isError: true
+                };
+            }
+        }
+    );
+}
+
+/**
+ * Register channel_set_name tool
+ * Set channel name/label
+ */
+function registerChannelSetNameTool(server: McpServer, connection: X32Connection): void {
+    server.registerTool(
+        'channel_set_name',
+        {
+            title: 'Set Channel Name',
+            description: 'Set the name/label for a specific input channel. Maximum 12 characters for X32/M32.',
+            inputSchema: {
+                channel: z.number().min(1).max(32).describe('Input channel number from 1 to 32'),
+                name: z.string().max(12).describe('Channel name (max 12 characters)')
+            },
+            annotations: {
+                readOnlyHint: false,
+                destructiveHint: false,
+                idempotentHint: true,
+                openWorldHint: true
+            }
+        },
+        async ({ channel, name }): Promise<CallToolResult> => {
+            if (!connection.connected) {
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: 'Not connected to X32/M32 mixer. Use connection_connect first.'
+                        }
+                    ],
+                    isError: true
+                };
+            }
+
+            try {
+                // Truncate name to 12 characters if longer
+                const truncatedName = name.substring(0, 12);
+                await connection.setChannelParameter(channel, 'config/name', truncatedName);
+
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: `Set channel ${channel} name to "${truncatedName}"`
+                        }
+                    ]
+                };
+            } catch (error) {
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: `Failed to set channel name: ${error instanceof Error ? error.message : String(error)}`
+                        }
+                    ],
+                    isError: true
+                };
+            }
+        }
+    );
+}
+
+/**
+ * Register channel_set_color tool
+ * Set channel strip color
+ */
+function registerChannelSetColorTool(server: McpServer, connection: X32Connection): void {
+    server.registerTool(
+        'channel_set_color',
+        {
+            title: 'Set Channel Color',
+            description: 'Set the strip color for a specific input channel. Colors help visually organize channels on the mixer.',
+            inputSchema: {
+                channel: z.number().min(1).max(32).describe('Input channel number from 1 to 32'),
+                color: z.string().describe('Color name (off, red, green, yellow, blue, magenta, cyan, white) or inverted variants (red-inv, etc.) or numeric value (0-15)')
+            },
+            annotations: {
+                readOnlyHint: false,
+                destructiveHint: false,
+                idempotentHint: true,
+                openWorldHint: true
+            }
+        },
+        async ({ channel, color }): Promise<CallToolResult> => {
+            if (!connection.connected) {
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: 'Not connected to X32/M32 mixer. Use connection_connect first.'
+                        }
+                    ],
+                    isError: true
+                };
+            }
+
+            try {
+                const colorValue = getColorValue(color);
+                if (colorValue === null) {
+                    const availableColors = getAvailableColors().join(', ');
+                    return {
+                        content: [
+                            {
+                                type: 'text',
+                                text: `Invalid color "${color}". Available colors: ${availableColors}`
+                            }
+                        ],
+                        isError: true
+                    };
+                }
+
+                await connection.setChannelParameter(channel, 'config/color', colorValue);
+
+                const colorName = getColorName(colorValue) || `color ${colorValue}`;
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: `Set channel ${channel} color to ${colorName}`
+                        }
+                    ]
+                };
+            } catch (error) {
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: `Failed to set channel color: ${error instanceof Error ? error.message : String(error)}`
                         }
                     ],
                     isError: true
@@ -517,5 +658,7 @@ export function registerChannelTools(server: McpServer, connection: X32Connectio
     registerChannelSoloTool(server, connection);
     registerChannelGetStateTool(server, connection);
     registerChannelSetEqBandTool(server, connection);
+    registerChannelSetNameTool(server, connection);
+    registerChannelSetColorTool(server, connection);
     registerLegacyChannelTool(server, connection);
 }
