@@ -1,13 +1,11 @@
 #!/usr/bin/env node
-import { Server, StdioServerTransport } from './server.js';
+import { StdioServerTransport } from './server.js';
+import { McpServer } from './mcp/mcp.js';
 import { X32Connection } from './services/x32-connection.js';
 import {
-    registerConnectTool,
-    registerInfoTool,
-    registerStatusTool,
-    registerGetParameterTool,
-    registerSetParameterTool,
-    registerChannelTool
+    registerConnectionTools,
+    registerChannelTools,
+    registerParameterTools
 } from './tools/index.js';
 
 /**
@@ -18,8 +16,8 @@ async function main() {
     // Create X32 connection instance
     const connection = new X32Connection();
 
-    // Create MCP server using the SDK directly
-    const server = new Server(
+    // Create MCP server using McpServer class
+    const server = new McpServer(
         {
             name: 'x32-mcp-server',
             version: '1.0.0'
@@ -31,13 +29,10 @@ async function main() {
         }
     );
 
-    // Register all tools
-    registerConnectTool(server, connection);
-    registerInfoTool(server, connection);
-    registerStatusTool(server, connection);
-    registerGetParameterTool(server, connection);
-    registerSetParameterTool(server, connection);
-    registerChannelTool(server, connection);
+    // Register all domain tools
+    registerConnectionTools(server, connection);
+    registerChannelTools(server, connection);
+    registerParameterTools(server, connection);
 
     // Setup connection event handlers
     connection.on('connected', () => {
