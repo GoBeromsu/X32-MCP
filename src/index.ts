@@ -55,13 +55,26 @@ async function main() {
     await server.connect(transport);
 
     console.error('X32 MCP Server running on stdio');
-    console.error('Available tools:');
-    console.error('  - x32_connect: Connect to X32/M32 mixer');
-    console.error('  - x32_get_info: Get console information');
-    console.error('  - x32_get_status: Get current status');
-    console.error('  - x32_get_parameter: Get parameter by OSC address');
-    console.error('  - x32_set_parameter: Set parameter by OSC address');
-    console.error('  - x32_channel: Get/set channel parameters');
+    console.error('');
+    console.error('Connection tools:');
+    console.error('  - connection_connect: Connect to X32/M32 mixer');
+    console.error('  - connection_disconnect: Disconnect from mixer');
+    console.error('  - connection_get_info: Get mixer information');
+    console.error('  - connection_get_status: Get connection status');
+    console.error('');
+    console.error('Channel tools:');
+    console.error('  - channel_set_volume: Set channel volume (linear or dB)');
+    console.error('  - channel_set_gain: Set preamp gain');
+    console.error('  - channel_mute: Mute/unmute channel');
+    console.error('  - channel_solo: Solo/unsolo channel');
+    console.error('  - channel_set_name: Set channel name');
+    console.error('  - channel_set_color: Set channel color');
+    console.error('  - channel_set_pan: Set stereo position');
+    console.error('  - channel_set_eq_band: Configure EQ');
+    console.error('');
+    console.error('Low-level tools:');
+    console.error('  - get_parameter: Get any parameter by OSC address');
+    console.error('  - set_parameter: Set any parameter by OSC address');
 
     // Handle graceful shutdown
     process.on('SIGINT', async () => {
