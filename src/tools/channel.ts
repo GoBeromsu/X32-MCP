@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { McpServer } from '../mcp/mcp.js';
-import { CallToolResult } from '../types/index.js';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { X32Connection } from '../services/x32-connection.js';
 import { dbToFader, faderToDb, formatDb } from '../utils/db-converter.js';
 import { getColorValue, getColorName, getAvailableColors } from '../utils/color-converter.js';

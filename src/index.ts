@@ -1,11 +1,10 @@
 #!/usr/bin/env node
-import { StdioServerTransport } from './server.js';
-import { McpServer } from './mcp/mcp.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { X32Connection } from './services/x32-connection.js';
 import {
     registerConnectionTools,
     registerChannelTools,
-    registerChannelDbTools,
     registerParameterTools
 } from './tools/index.js';
 
