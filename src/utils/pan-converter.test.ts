@@ -66,9 +66,9 @@ describe('Pan Converter', () => {
             expect(parsePan(50)).toBeCloseTo(0.75, 2);
         });
 
-        test('parses linear values', () => {
-            expect(parsePan(0.5)).toBe(0.5);
-            expect(parsePan(0.75)).toBe(0.75);
+        test('parses percentage values as percentage', () => {
+            expect(parsePan(0.5)).toBeCloseTo(0.50125, 2); // 0.5% as percentage
+            expect(parsePan(25)).toBeCloseTo(0.625, 2); // 25% right
         });
 
         test('parses LR notation', () => {
@@ -79,7 +79,7 @@ describe('Pan Converter', () => {
 
         test('parses string numbers', () => {
             expect(parsePan('-50')).toBeCloseTo(0.25, 2);
-            expect(parsePan('0.5')).toBe(0.5);
+            expect(parsePan('0.5')).toBeCloseTo(0.5, 2);
         });
 
         test('returns null for invalid input', () => {

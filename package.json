@@ -1,5 +1,5 @@
 {
-    "name": "x32-mcp-server",
+    "name": "x32-m32-mcp-server",
     "version": "1.0.0",
     "description": "MCP server for controlling Behringer X32/M32 digital mixing consoles via OSC",
     "license": "MIT",
@@ -13,7 +13,7 @@
     },
     "main": "dist/index.js",
     "bin": {
-        "x32-mcp-server": "dist/index.js"
+        "x32-m32-mcp-server": "dist/index.js"
     },
     "engines": {
         "node": ">=18"

@@ -1,4 +1,4 @@
-# X32 MCP Server
+# X32/M32 MCP Server
 
 A Model Context Protocol (MCP) server for controlling Behringer X32/M32 digital mixing consoles via OSC protocol.
 
