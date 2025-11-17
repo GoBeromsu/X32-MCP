@@ -89,7 +89,6 @@ async function testLiveConnection() {
         console.log('Disconnecting...');
         await connection.disconnect();
         console.log('✅ Disconnected\n');
-
     } catch (error) {
         console.error('❌ Test failed:', error);
         if (connection.connected) {

@@ -51,7 +51,7 @@ function registerFxSetParameterTool(server: McpServer, connection: X32Connection
                         content: [
                             {
                                 type: 'text',
-                                text: `Invalid parameter value: ${value}. Must be between 0.0 and 1.0.`
+                                text: `Invalid parameter value: ${value}. Must be between 0.0 and 1.0.\n\nFX parameters use normalized values:\n- 0.0 = minimum parameter value\n- 1.0 = maximum parameter value\n- Interpretation varies by parameter type (time, level, frequency, etc.)\n\nTo adjust this parameter:\n1. Ensure value is in 0.0-1.0 range\n2. Use fx_get_state to see current parameter values\n3. Consult X32/M32 effect documentation for parameter meanings`
                             }
                         ],
                         isError: true
@@ -73,11 +73,12 @@ function registerFxSetParameterTool(server: McpServer, connection: X32Connection
                     ]
                 };
             } catch (error) {
+                const errorMsg = error instanceof Error ? error.message : String(error);
                 return {
                     content: [
                         {
                             type: 'text',
-                            text: `Failed to set FX parameter: ${error instanceof Error ? error.message : String(error)}`
+                            text: `Failed to set FX parameter: ${errorMsg}\n\nFX Rack Overview:\n- The X32/M32 has 8 effects racks numbered 1-8\n- Each rack has a specific effect type loaded\n- Parameters 1-64 are available, but valid range depends on effect type\n- Not all parameters are used by every effect\n\nTroubleshooting:\n1. Verify FX rack ${fx} exists (valid: 1-8)\n2. Check parameter ${parameter} is valid for the current effect type\n3. Use fx_get_state tool to see current effect configuration\n4. Consult X32/M32 documentation for effect-specific parameter mappings`
                         }
                     ],
                     isError: true
@@ -152,11 +153,12 @@ function registerFxGetStateTool(server: McpServer, connection: X32Connection): v
                     ]
                 };
             } catch (error) {
+                const errorMsg = error instanceof Error ? error.message : String(error);
                 return {
                     content: [
                         {
                             type: 'text',
-                            text: `Failed to get FX state: ${error instanceof Error ? error.message : String(error)}`
+                            text: `Failed to get FX state: ${errorMsg}\n\nFX Rack System:\n- X32/M32 provides 8 independent effects racks (1-8)\n- Each rack can load different effect types (reverb, delay, chorus, etc.)\n- Effect type determines which parameters are active\n- Parameters vary by effect: some use 6, others up to 64\n\nTroubleshooting:\n1. Verify FX rack number is 1-8 (you specified: ${fx})\n2. Ensure mixer connection is active\n3. Check that mixer is responding to OSC commands\n4. Try a different FX rack number if this one is not responding`
                         }
                     ],
                     isError: true
@@ -217,11 +219,12 @@ function registerFxBypassTool(server: McpServer, connection: X32Connection): voi
                     ]
                 };
             } catch (error) {
+                const errorMsg = error instanceof Error ? error.message : String(error);
                 return {
                     content: [
                         {
                             type: 'text',
-                            text: `Failed to ${bypass ? 'bypass' : 'enable'} FX: ${error instanceof Error ? error.message : String(error)}`
+                            text: `Failed to ${bypass ? 'bypass' : 'enable'} FX: ${errorMsg}\n\nFX Bypass Control:\n- Bypass allows audio to pass through unprocessed\n- Effect settings are retained when bypassed\n- Commonly used for A/B comparison or temporary disable\n- Uses parameter 02 for most effect types (0=enabled, 1=bypassed)\n\nTroubleshooting:\n1. Verify FX rack ${fx} is valid (1-8)\n2. Some effects may use different parameter for bypass\n3. Use fx_get_state to see current effect configuration\n4. Try fx_set_parameter with parameter 2 for manual bypass control`
                         }
                     ],
                     isError: true

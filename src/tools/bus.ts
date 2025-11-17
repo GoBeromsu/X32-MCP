@@ -41,7 +41,7 @@ function registerBusSetVolumeTool(server: McpServer, connection: X32Connection):
                     content: [
                         {
                             type: 'text',
-                            text: 'Not connected to X32/M32 mixer. Use connection_connect first.'
+                            text: 'Not connected to X32/M32 mixer. First, establish connection using connection_connect tool with parameters:\n  - host: IP address of mixer (e.g., "192.168.1.100")\n  - port: OSC port, typically 10023\n\nExample: connection_connect with host="192.168.1.100" and port=10023'
                         }
                     ],
                     isError: true
@@ -59,7 +59,7 @@ function registerBusSetVolumeTool(server: McpServer, connection: X32Connection):
                             content: [
                                 {
                                     type: 'text',
-                                    text: `Invalid dB value: ${value}. Must be between -90 and +10 dB.`
+                                    text: `Invalid dB value: ${value} dB. Must be between -90 and +10 dB.\n\nValid range:\n  - Minimum: -90 dB (silence)\n  - Unity gain: 0 dB (no boost/cut)\n  - Maximum: +10 dB (boost)\n\nExamples:\n  - Set to -6 dB: value=-6, unit="db"\n  - Set to unity: value=0, unit="db"\n  - Set to +3 dB: value=3, unit="db"`
                                 }
                             ],
                             isError: true
@@ -74,7 +74,7 @@ function registerBusSetVolumeTool(server: McpServer, connection: X32Connection):
                             content: [
                                 {
                                     type: 'text',
-                                    text: `Invalid linear value: ${value}. Must be between 0.0 and 1.0.`
+                                    text: `Invalid linear value: ${value}. Must be between 0.0 and 1.0.\n\nLinear scale explanation:\n  - 0.0 = -∞ dB (silence)\n  - 0.75 = 0 dB (unity gain, no boost/cut)\n  - 1.0 = +10 dB (maximum)\n\nExamples:\n  - Set to silence: value=0.0\n  - Set to unity gain: value=0.75\n  - Set to half volume: value=0.5\n\nAlternatively, use unit="db" for decibel values (-90 to +10 dB).`
                                 }
                             ],
                             isError: true
@@ -136,7 +136,7 @@ function registerBusMuteTool(server: McpServer, connection: X32Connection): void
                     content: [
                         {
                             type: 'text',
-                            text: 'Not connected to X32/M32 mixer. Use connection_connect first.'
+                            text: 'Not connected to X32/M32 mixer. First, establish connection using connection_connect tool with parameters:\n  - host: IP address of mixer (e.g., "192.168.1.100")\n  - port: OSC port, typically 10023\n\nExample: connection_connect with host="192.168.1.100" and port=10023'
                         }
                     ],
                     isError: true
@@ -203,7 +203,7 @@ function registerBusSetSendTool(server: McpServer, connection: X32Connection): v
                     content: [
                         {
                             type: 'text',
-                            text: 'Not connected to X32/M32 mixer. Use connection_connect first.'
+                            text: 'Not connected to X32/M32 mixer. First, establish connection using connection_connect tool with parameters:\n  - host: IP address of mixer (e.g., "192.168.1.100")\n  - port: OSC port, typically 10023\n\nExample: connection_connect with host="192.168.1.100" and port=10023'
                         }
                     ],
                     isError: true
@@ -221,7 +221,7 @@ function registerBusSetSendTool(server: McpServer, connection: X32Connection): v
                             content: [
                                 {
                                     type: 'text',
-                                    text: `Invalid dB value: ${value}. Must be between -90 and +10 dB.`
+                                    text: `Invalid dB value: ${value} dB. Must be between -90 and +10 dB.\n\nValid range:\n  - Minimum: -90 dB (silence/off)\n  - Unity gain: 0 dB (no boost/cut)\n  - Maximum: +10 dB (boost)\n\nExamples:\n  - Silence send: value=-90, unit="db"\n  - Unity send: value=0, unit="db"\n  - Boost send: value=3, unit="db"`
                                 }
                             ],
                             isError: true
@@ -236,7 +236,7 @@ function registerBusSetSendTool(server: McpServer, connection: X32Connection): v
                             content: [
                                 {
                                     type: 'text',
-                                    text: `Invalid linear value: ${value}. Must be between 0.0 and 1.0.`
+                                    text: `Invalid linear value: ${value}. Must be between 0.0 and 1.0.\n\nLinear scale explanation:\n  - 0.0 = -∞ dB (no send signal)\n  - 0.75 = 0 dB (unity send level)\n  - 1.0 = +10 dB (maximum send)\n\nExamples:\n  - No send: value=0.0\n  - Unity send: value=0.75\n  - Half send: value=0.5\n\nAlternatively, use unit="db" for decibel values (-90 to +10 dB).`
                                 }
                             ],
                             isError: true
@@ -303,7 +303,7 @@ function registerBusGetStateTool(server: McpServer, connection: X32Connection): 
                     content: [
                         {
                             type: 'text',
-                            text: 'Not connected to X32/M32 mixer. Use connection_connect first.'
+                            text: 'Not connected to X32/M32 mixer. First, establish connection using connection_connect tool with parameters:\n  - host: IP address of mixer (e.g., "192.168.1.100")\n  - port: OSC port, typically 10023\n\nExample: connection_connect with host="192.168.1.100" and port=10023'
                         }
                     ],
                     isError: true

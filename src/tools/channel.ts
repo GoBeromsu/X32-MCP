@@ -5,6 +5,7 @@ import { X32Connection } from '../services/x32-connection.js';
 import { dbToFader, faderToDb, formatDb } from '../utils/db-converter.js';
 import { getColorValue, getColorName, getAvailableColors } from '../utils/color-converter.js';
 import { parsePan, formatPan, panToPercent } from '../utils/pan-converter.js';
+import { X32Error } from '../utils/error-helper.js';
 
 /**
  * Channel domain tools
@@ -43,7 +44,7 @@ function registerChannelSetVolumeTool(server: McpServer, connection: X32Connecti
                     content: [
                         {
                             type: 'text',
-                            text: 'Not connected to X32/M32 mixer. Use connection_connect first.'
+                            text: X32Error.notConnected()
                         }
                     ],
                     isError: true
@@ -61,7 +62,7 @@ function registerChannelSetVolumeTool(server: McpServer, connection: X32Connecti
                             content: [
                                 {
                                     type: 'text',
-                                    text: `Invalid dB value: ${value}. Must be between -90 and +10 dB.`
+                                    text: X32Error.invalidDb(value)
                                 }
                             ],
                             isError: true
@@ -76,7 +77,7 @@ function registerChannelSetVolumeTool(server: McpServer, connection: X32Connecti
                             content: [
                                 {
                                     type: 'text',
-                                    text: `Invalid linear value: ${value}. Must be between 0.0 and 1.0.`
+                                    text: X32Error.invalidLinear(value)
                                 }
                             ],
                             isError: true
@@ -139,7 +140,7 @@ function registerChannelSetGainTool(server: McpServer, connection: X32Connection
                     content: [
                         {
                             type: 'text',
-                            text: 'Not connected to X32/M32 mixer. Use connection_connect first.'
+                            text: X32Error.notConnected()
                         }
                     ],
                     isError: true
@@ -198,7 +199,7 @@ function registerChannelMuteTool(server: McpServer, connection: X32Connection): 
                     content: [
                         {
                             type: 'text',
-                            text: 'Not connected to X32/M32 mixer. Use connection_connect first.'
+                            text: X32Error.notConnected()
                         }
                     ],
                     isError: true
@@ -260,7 +261,7 @@ function registerChannelSoloTool(server: McpServer, connection: X32Connection): 
                     content: [
                         {
                             type: 'text',
-                            text: 'Not connected to X32/M32 mixer. Use connection_connect first.'
+                            text: X32Error.notConnected()
                         }
                     ],
                     isError: true
@@ -322,7 +323,7 @@ function registerChannelSetEqBandTool(server: McpServer, connection: X32Connecti
                     content: [
                         {
                             type: 'text',
-                            text: 'Not connected to X32/M32 mixer. Use connection_connect first.'
+                            text: X32Error.notConnected()
                         }
                     ],
                     isError: true
@@ -384,7 +385,7 @@ function registerChannelSetNameTool(server: McpServer, connection: X32Connection
                     content: [
                         {
                             type: 'text',
-                            text: 'Not connected to X32/M32 mixer. Use connection_connect first.'
+                            text: X32Error.notConnected()
                         }
                     ],
                     isError: true
@@ -450,7 +451,7 @@ function registerChannelSetColorTool(server: McpServer, connection: X32Connectio
                     content: [
                         {
                             type: 'text',
-                            text: 'Not connected to X32/M32 mixer. Use connection_connect first.'
+                            text: X32Error.notConnected()
                         }
                     ],
                     isError: true
@@ -465,7 +466,7 @@ function registerChannelSetColorTool(server: McpServer, connection: X32Connectio
                         content: [
                             {
                                 type: 'text',
-                                text: `Invalid color "${color}". Available colors: ${availableColors}`
+                                text: `Invalid color value: "${color}"\n\nColors help visually organize channels on the mixer display.\n\nAvailable color names:\n  ${availableColors}\n\nExamples:\n  - Set to red: color="red"\n  - Set to inverted blue: color="blue-inv"\n  - Set to no color: color="off"\n  - Set by number: color="3" (numeric values 0-15)`
                             }
                         ],
                         isError: true
@@ -528,7 +529,7 @@ function registerChannelSetPanTool(server: McpServer, connection: X32Connection)
                     content: [
                         {
                             type: 'text',
-                            text: 'Not connected to X32/M32 mixer. Use connection_connect first.'
+                            text: X32Error.notConnected()
                         }
                     ],
                     isError: true
@@ -542,7 +543,7 @@ function registerChannelSetPanTool(server: McpServer, connection: X32Connection)
                         content: [
                             {
                                 type: 'text',
-                                text: `Invalid pan value "${pan}". Use percentage (-100 to +100), LR notation (L50/C/R100), or linear (0.0-1.0).`
+                                text: `Invalid pan value: "${pan}"\n\nPan controls stereo positioning (left/right balance).\n\nAccepted formats:\n  1. Percentage: -100 (full left) to +100 (full right)\n     Examples: -50, 0 (center), +75\n  \n  2. LR notation: L100 (full left), C (center), R100 (full right)\n     Examples: "L50", "C", "R30"\n  \n  3. Linear: 0.0 (full left) to 1.0 (full right)\n     Examples: 0.0, 0.5 (center), 0.75\n\nCommon values:\n  - Full left: -100, "L100", or 0.0\n  - Center: 0, "C", or 0.5\n  - Full right: +100, "R100", or 1.0`
                             }
                         ],
                         isError: true

@@ -53,11 +53,38 @@ function registerConnectionConnectTool(server: McpServer, connection: X32Connect
                     ]
                 };
             } catch (error) {
+                const errorMessage = error instanceof Error ? error.message : String(error);
+                const troubleshootingSteps = [
+                    `Connection to X32/M32 mixer failed: ${errorMessage}`,
+                    '',
+                    'Common causes and solutions:',
+                    '1. Mixer is powered off or not on the network',
+                    '   → Power on the mixer and ensure it is connected to the same network',
+                    '',
+                    '2. Incorrect IP address',
+                    `   → Verify the IP address (currently trying: ${host})`,
+                    "   → Check mixer's network settings menu or use network scanning tools",
+                    '',
+                    '3. Firewall blocking UDP traffic',
+                    `   → Ensure port ${port} (UDP) is not blocked by your firewall`,
+                    '   → Try temporarily disabling firewall to test connectivity',
+                    '',
+                    '4. Network routing issues',
+                    '   → Ensure mixer and control computer are on the same subnet',
+                    '   → Verify network cables are securely connected',
+                    '',
+                    'Next steps:',
+                    "- Verify mixer IP address in mixer's network settings",
+                    '- Ping the mixer to test basic network connectivity',
+                    '- Check that no other application is using the OSC port',
+                    `- Try the standard X32/M32 port (10023) or check mixer documentation`
+                ].join('\n');
+
                 return {
                     content: [
                         {
                             type: 'text',
-                            text: `Connection to X32/M32 mixer failed: ${error instanceof Error ? error.message : String(error)}. Please verify the mixer is powered on, connected to the network, and the IP address is correct. Check that port ${port} is not blocked by firewall.`
+                            text: troubleshootingSteps
                         }
                     ],
                     isError: true
@@ -109,11 +136,35 @@ function registerConnectionDisconnectTool(server: McpServer, connection: X32Conn
                     ]
                 };
             } catch (error) {
+                const errorMessage = error instanceof Error ? error.message : String(error);
+                const troubleshootingSteps = [
+                    `Disconnection from X32/M32 mixer failed: ${errorMessage}`,
+                    '',
+                    'What this means:',
+                    '- The connection may already be closed or in an invalid state',
+                    '- Network resources might not be releasing properly',
+                    '',
+                    'Recommended actions:',
+                    '1. Check current connection status:',
+                    '   → Use connection_get_status to verify connection state',
+                    '',
+                    '2. Force cleanup if needed:',
+                    '   → The connection may be in a stuck state',
+                    '   → Try restarting the MCP server if this persists',
+                    '',
+                    '3. Verify mixer status:',
+                    '   → Ensure the mixer is still responsive',
+                    '   → Check if the mixer is still on the network',
+                    '',
+                    'Note: Even if disconnection fails, you can attempt connection_connect',
+                    'to establish a new connection. The connection state will be reset.'
+                ].join('\n');
+
                 return {
                     content: [
                         {
                             type: 'text',
-                            text: `Failed to disconnect: ${error instanceof Error ? error.message : String(error)}`
+                            text: troubleshootingSteps
                         }
                     ],
                     isError: true
@@ -144,11 +195,31 @@ function registerConnectionGetInfoTool(server: McpServer, connection: X32Connect
         },
         async (): Promise<CallToolResult> => {
             if (!connection.connected) {
+                const notConnectedMessage = [
+                    'Cannot retrieve console information: Not connected to X32/M32 mixer',
+                    '',
+                    'What you need to do:',
+                    '1. First establish a connection using connection_connect',
+                    '',
+                    'Example usage:',
+                    '  Tool: connection_connect',
+                    '  Parameters:',
+                    '    host: "192.168.1.100"  (your mixer\'s IP address)',
+                    '    port: 10023             (standard X32/M32 OSC port)',
+                    '',
+                    "How to find your mixer's IP address:",
+                    '- On the mixer: Setup → Network → IP Address',
+                    '- Use a network scanning tool to discover devices',
+                    "- Check your router's DHCP client list",
+                    '',
+                    'After connecting, you can use this tool to get console information.'
+                ].join('\n');
+
                 return {
                     content: [
                         {
                             type: 'text',
-                            text: 'Not connected to X32/M32 mixer. Use connection_connect first.'
+                            text: notConnectedMessage
                         }
                     ],
                     isError: true
@@ -173,11 +244,42 @@ function registerConnectionGetInfoTool(server: McpServer, connection: X32Connect
                     ]
                 };
             } catch (error) {
+                const errorMessage = error instanceof Error ? error.message : String(error);
+                const troubleshootingSteps = [
+                    `Failed to retrieve console information: ${errorMessage}`,
+                    '',
+                    'What went wrong:',
+                    '- The mixer did not respond to the information request',
+                    '- Communication timeout or network interruption occurred',
+                    '',
+                    'Possible causes:',
+                    '1. Connection was lost:',
+                    '   → The mixer may have been powered off or disconnected from network',
+                    '   → Network cable may have been unplugged',
+                    '',
+                    '2. Mixer is not responding:',
+                    '   → The mixer may be busy or overloaded',
+                    '   → Firmware issue preventing OSC responses',
+                    '',
+                    'How to fix:',
+                    '1. Check connection status:',
+                    '   → Use connection_get_status to verify connection state',
+                    '',
+                    '2. Reconnect if needed:',
+                    '   → Use connection_disconnect followed by connection_connect',
+                    '   → Verify the mixer is powered on and network is stable',
+                    '',
+                    '3. If problem persists:',
+                    '   → Restart the mixer',
+                    '   → Check mixer firmware version and update if needed',
+                    '   → Verify no other applications are heavily using OSC communication'
+                ].join('\n');
+
                 return {
                     content: [
                         {
                             type: 'text',
-                            text: `Failed to get info: ${error instanceof Error ? error.message : String(error)}`
+                            text: troubleshootingSteps
                         }
                     ],
                     isError: true
@@ -208,11 +310,31 @@ function registerConnectionGetStatusTool(server: McpServer, connection: X32Conne
         },
         async (): Promise<CallToolResult> => {
             if (!connection.connected) {
+                const notConnectedMessage = [
+                    'Cannot retrieve connection status: Not connected to X32/M32 mixer',
+                    '',
+                    'What you need to do:',
+                    '1. First establish a connection using connection_connect',
+                    '',
+                    'Example usage:',
+                    '  Tool: connection_connect',
+                    '  Parameters:',
+                    '    host: "192.168.1.100"  (your mixer\'s IP address)',
+                    '    port: 10023             (standard X32/M32 OSC port)',
+                    '',
+                    "How to find your mixer's IP address:",
+                    '- On the mixer: Setup → Network → IP Address',
+                    '- Use a network scanning tool to discover devices',
+                    "- Check your router's DHCP client list",
+                    '',
+                    'After connecting, you can use this tool to monitor connection status.'
+                ].join('\n');
+
                 return {
                     content: [
                         {
                             type: 'text',
-                            text: 'Not connected to X32/M32 mixer. Use connection_connect first.'
+                            text: notConnectedMessage
                         }
                     ],
                     isError: true
@@ -234,11 +356,47 @@ function registerConnectionGetStatusTool(server: McpServer, connection: X32Conne
                     ]
                 };
             } catch (error) {
+                const errorMessage = error instanceof Error ? error.message : String(error);
+                const troubleshootingSteps = [
+                    `Failed to retrieve connection status: ${errorMessage}`,
+                    '',
+                    'What went wrong:',
+                    '- The mixer did not respond to the status request',
+                    '- Communication timeout or network interruption occurred',
+                    '',
+                    'Possible causes:',
+                    '1. Connection was lost:',
+                    '   → The mixer may have been powered off or disconnected from network',
+                    '   → Network cable may have been unplugged',
+                    '   → The mixer may have restarted',
+                    '',
+                    '2. Network issues:',
+                    '   → Temporary network congestion or packet loss',
+                    '   → Router or switch problems',
+                    '   → WiFi interference (if using wireless connection)',
+                    '',
+                    'How to fix:',
+                    '1. Verify basic connectivity:',
+                    '   → Check if the mixer is powered on',
+                    '   → Verify network cables are connected',
+                    "   → Try pinging the mixer's IP address",
+                    '',
+                    '2. Reconnect if needed:',
+                    '   → Use connection_disconnect followed by connection_connect',
+                    "   → Verify the mixer IP address hasn't changed (check DHCP settings)",
+                    '',
+                    '3. If problem persists:',
+                    '   → Restart the mixer',
+                    '   → Restart network equipment (router, switch)',
+                    '   → Use a wired connection instead of WiFi for reliability',
+                    '   → Check for network configuration changes'
+                ].join('\n');
+
                 return {
                     content: [
                         {
                             type: 'text',
-                            text: `Failed to get status: ${error instanceof Error ? error.message : String(error)}`
+                            text: troubleshootingSteps
                         }
                     ],
                     isError: true

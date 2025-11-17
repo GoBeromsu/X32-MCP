@@ -57,11 +57,12 @@ function registerGetParameterTool(server: McpServer, connection: X32Connection):
                     ]
                 };
             } catch (error) {
+                const errorMsg = error instanceof Error ? error.message : String(error);
                 return {
                     content: [
                         {
                             type: 'text',
-                            text: `Failed to get parameter: ${error instanceof Error ? error.message : String(error)}`
+                            text: `Failed to get parameter: ${errorMsg}\n\nLOW-LEVEL TOOL: This is an advanced tool for direct OSC access.\n\nPrefer semantic tools:\n- Use channel_get_state instead of /ch/XX/... addresses\n- Use bus_get_state instead of /bus/XX/... addresses\n- Use fx_get_state instead of /fx/X/... addresses\n\nOSC Address Format:\n- Channels: /ch/01-32/<section>/<param>\n- Buses: /bus/01-16/<section>/<param>\n- FX: /fx/1-8/<param>\n- Main: /main/st/<section>/<param>\n\nCommon sections: mix, config, eq, dyn, gate, insert\n\nTroubleshooting:\n1. Verify address format matches OSC specification\n2. Check that mixer connection is active\n3. Ensure address exists on X32/M32 (consult OSC documentation)\n4. Try semantic tools first (channel_*, bus_*, fx_*, main_*)\n5. Address provided: ${address}`
                         }
                     ],
                     isError: true
@@ -123,11 +124,12 @@ function registerSetParameterTool(server: McpServer, connection: X32Connection):
                     ]
                 };
             } catch (error) {
+                const errorMsg = error instanceof Error ? error.message : String(error);
                 return {
                     content: [
                         {
                             type: 'text',
-                            text: `Failed to set parameter: ${error instanceof Error ? error.message : String(error)}`
+                            text: `Failed to set parameter: ${errorMsg}\n\nLOW-LEVEL TOOL: This is an advanced tool for direct OSC access.\n\nWARNING: Direct parameter setting bypasses validation.\n\nPrefer semantic tools for safety:\n- Use channel_set_volume instead of /ch/XX/mix/fader\n- Use bus_set_volume instead of /bus/XX/mix/fader\n- Use fx_set_parameter instead of /fx/X/par/XX\n- Use main_set_volume instead of /main/st/mix/fader\n\nOSC Address Format:\n- Channels: /ch/01-32/<section>/<param>\n- Buses: /bus/01-16/<section>/<param>\n- FX: /fx/1-8/par/01-64\n- Main: /main/st/<section>/<param>\n\nValue Types:\n- Faders: 0.0-1.0 (linear)\n- Mutes: 0 (muted) or 1 (unmuted) - note inverted for /on parameters\n- Pan: 0.0 (left) to 0.5 (center) to 1.0 (right)\n- Colors: 0-15 integer values\n\nTroubleshooting:\n1. Verify address format matches OSC specification\n2. Check value type and range for the parameter\n3. Ensure mixer connection is active\n4. Try semantic tools first for common operations\n5. Address provided: ${address}\n6. Value provided: ${value}`
                         }
                     ],
                     isError: true

@@ -58,7 +58,7 @@ function registerMainSetVolumeTool(server: McpServer, connection: X32Connection)
                             content: [
                                 {
                                     type: 'text',
-                                    text: `Invalid dB value: ${value}. Must be between -90 and +10 dB.`
+                                    text: `Invalid dB value: ${value}. Must be between -90 and +10 dB.\n\nWARNING: Main output controls the primary mixer output.\n\nValid dB range:\n- -90 dB = minimum/silence\n- 0 dB = unity gain (0.75 linear)\n- +10 dB = maximum output\n\nSafety considerations:\n1. Start with low values when testing\n2. Sudden volume changes can damage speakers or hearing\n3. Consider using monitor outputs for testing instead\n4. Use channel/bus controls for most mixing tasks`
                                 }
                             ],
                             isError: true
@@ -73,7 +73,7 @@ function registerMainSetVolumeTool(server: McpServer, connection: X32Connection)
                             content: [
                                 {
                                     type: 'text',
-                                    text: `Invalid linear value: ${value}. Must be between 0.0 and 1.0.`
+                                    text: `Invalid linear value: ${value}. Must be between 0.0 and 1.0.\n\nWARNING: Main output controls the primary mixer output.\n\nValid linear range:\n- 0.0 = silence\n- 0.75 = unity gain (0 dB)\n- 1.0 = maximum (+10 dB)\n\nSafety considerations:\n1. Start with low values (< 0.5) when testing\n2. Sudden volume changes can damage speakers or hearing\n3. Consider using monitor outputs for testing instead\n4. Use channel/bus controls for most mixing tasks`
                                 }
                             ],
                             isError: true
@@ -94,11 +94,12 @@ function registerMainSetVolumeTool(server: McpServer, connection: X32Connection)
                     ]
                 };
             } catch (error) {
+                const errorMsg = error instanceof Error ? error.message : String(error);
                 return {
                     content: [
                         {
                             type: 'text',
-                            text: `Failed to set main volume: ${error instanceof Error ? error.message : String(error)}`
+                            text: `Failed to set main volume: ${errorMsg}\n\nCRITICAL: Main output controls affect the primary mixer output.\n\nMain vs Monitor:\n- Main (/main/st) = Primary house/PA output to speakers\n- Monitor (/main/m) = Engineer monitoring/headphones\n- Changing main affects audience, not just monitoring\n\nTroubleshooting:\n1. Verify mixer connection is active\n2. Check if main output is muted (use main_mute to check)\n3. Consider using monitor_set_level for testing\n4. Ensure value is in valid range\n5. Try channel_set_volume for individual channel control`
                         }
                     ],
                     isError: true
@@ -155,11 +156,12 @@ function registerMainMuteTool(server: McpServer, connection: X32Connection): voi
                     ]
                 };
             } catch (error) {
+                const errorMsg = error instanceof Error ? error.message : String(error);
                 return {
                     content: [
                         {
                             type: 'text',
-                            text: `Failed to ${muted ? 'mute' : 'unmute'} main output: ${error instanceof Error ? error.message : String(error)}`
+                            text: `Failed to ${muted ? 'mute' : 'unmute'} main output: ${errorMsg}\n\nCRITICAL: Muting main output affects the primary house/PA speakers.\n\nMain Output Control:\n- Muting stops all sound to main speakers\n- Used for emergency silence or show transitions\n- Does NOT affect monitor outputs\n- X32 uses inverted logic: 0=muted, 1=unmuted\n\nWarning when unmuting:\n- Check main volume level first (use main_set_volume)\n- Ensure volume is at safe level before unmuting\n- Sudden loud unmute can damage speakers or hearing\n\nTroubleshooting:\n1. Verify mixer connection is active\n2. Check OSC communication is working\n3. Try setting main volume to confirm control path works`
                         }
                     ],
                     isError: true
@@ -218,7 +220,7 @@ function registerMonitorSetLevelTool(server: McpServer, connection: X32Connectio
                             content: [
                                 {
                                     type: 'text',
-                                    text: `Invalid dB value: ${value}. Must be between -90 and +10 dB.`
+                                    text: `Invalid dB value: ${value}. Must be between -90 and +10 dB.\n\nMonitor Output Control:\n- Monitor output (/main/m) is for engineer monitoring only\n- Does NOT affect main house/PA speakers\n- Safe for testing without affecting audience\n\nValid dB range:\n- -90 dB = minimum/silence\n- 0 dB = unity gain (0.75 linear)\n- +10 dB = maximum output\n\nRecommendation:\n- Start with -20 dB for safe headphone monitoring\n- Increase gradually to comfortable listening level`
                                 }
                             ],
                             isError: true
@@ -233,7 +235,7 @@ function registerMonitorSetLevelTool(server: McpServer, connection: X32Connectio
                             content: [
                                 {
                                     type: 'text',
-                                    text: `Invalid linear value: ${value}. Must be between 0.0 and 1.0.`
+                                    text: `Invalid linear value: ${value}. Must be between 0.0 and 1.0.\n\nMonitor Output Control:\n- Monitor output (/main/m) is for engineer monitoring only\n- Does NOT affect main house/PA speakers\n- Safe for testing without affecting audience\n\nValid linear range:\n- 0.0 = silence\n- 0.75 = unity gain (0 dB)\n- 1.0 = maximum (+10 dB)\n\nRecommendation:\n- Start with 0.3-0.4 for safe headphone monitoring\n- Increase gradually to comfortable listening level`
                                 }
                             ],
                             isError: true
@@ -254,11 +256,12 @@ function registerMonitorSetLevelTool(server: McpServer, connection: X32Connectio
                     ]
                 };
             } catch (error) {
+                const errorMsg = error instanceof Error ? error.message : String(error);
                 return {
                     content: [
                         {
                             type: 'text',
-                            text: `Failed to set monitor level: ${error instanceof Error ? error.message : String(error)}`
+                            text: `Failed to set monitor level: ${errorMsg}\n\nMonitor vs Main Output:\n- Monitor (/main/m) = Engineer monitoring output (headphones/near-field)\n- Main (/main/st) = Primary house/PA output to speakers\n- Monitor is safe for testing, does not affect audience\n\nMonitor Output Uses:\n- Solo bus monitoring\n- Cue/preview before sending to main\n- Engineer headphone mix\n- Control room monitoring\n\nTroubleshooting:\n1. Verify mixer connection is active\n2. Check that monitor output is configured\n3. Ensure monitor routing is set up correctly\n4. Try main_set_volume if you intended to control main output`
                         }
                     ],
                     isError: true
